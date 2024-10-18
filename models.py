@@ -12,7 +12,7 @@ class User(Base):
 class WeightEntry(Base):
     __tablename__="Weight_entries"
     id = Column(Integer,primary_key=True)
-    username = Column(String,unique=True)
+    username = Column(String)
     weight= Column(Float)
     date= Column(Date) 
 

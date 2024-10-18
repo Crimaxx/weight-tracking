@@ -16,17 +16,21 @@ def create_user_in_db(data:Usercreateshcema,db:Session):
     db.refresh(new_user)
     return {"msg":"new user is created"}
 
-def new_weight(data:Weightentryschema,db:Session):
-    weight_entry=db.query(WeightEntry).filter_by(username=data.username,date=data.date).first()
-    if weight_entry:
-        weight_entry.weight=data.weight
+def new_weight(*,data:Weightentryschema,db:Session):
+    user=db.query(User).filter_by(username=data.username).first()
+    user_weight=db.query(WeightEntry).filter_by(username=data.username,date=data.date).first()
+    new_weight_of_user=WeightEntry(username=data.username,weight=data.weight,date=data.date)
+    if not user:
+        raise UserNottFoundException()
+    if user_weight:
+        db.query(WeightEntry).filter_by(username=data.username,date=data.date).update({"weight":data.weight})
         db.commit()
-    else:
-        weight_entry=WeightEntry(username=data.username,weight=data.weight,date=data.date)
-        db.add(weight_entry)
-        db.commit()
-        db.refresh(weight_entry)
-    return weight_entry
+        return {"msg":"weight is added"}
+
+    db.add(new_weight_of_user)
+    db.commit()
+    db.refresh(new_weight_of_user)
+    return {"msg":"weight is added"}
 
 def get_latest_weight(db: Session, username: str):
     return db.query(WeightEntry).filter(WeightEntry.username == username).order_by(WeightEntry.date.desc()).first()
