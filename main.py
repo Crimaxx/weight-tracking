@@ -29,9 +29,9 @@ def current_weight(username: str, db: Session = Depends(get_db)):
 
 @app.get("/weight_change")
 def weight_change(username: str, db: Session = Depends(get_db)):
-    first, last = get_weight_change(db, username)
-    if first and last:
-        return {"weight_change": last.weight - first.weight}
+    weight_change = get_weight_change(db, username)
+    if weight_change:
+        return  weight_change
     raise HTTPException(status_code=404, detail="No weight data found.")
 
 @app.get("/bmi")

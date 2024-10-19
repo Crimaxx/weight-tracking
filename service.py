@@ -36,9 +36,27 @@ def get_latest_weight(db: Session, username: str):
     return db.query(WeightEntry).filter(WeightEntry.username == username).order_by(WeightEntry.date.desc()).first()
 
 def get_weight_change(db: Session, username: str):
-    first_weight=db.query(WeightEntry).filter(WeightEntry.username == username).order_by(WeightEntry.date.asc()).first()
-    latest_weight=db.query(WeightEntry).filter(WeightEntry.username == username).order_by(WeightEntry.date.desc()).first()
-    return first_weight, latest_weight
+    user_weight=db.query(WeightEntry).filter_by(username=username).all()
+    if not user_weight:
+        raise UserNottFoundException()
+    ls=[]
+    for i in user_weight:
+        ls.append(i.date)
+    max_date=max(ls)
+    min_date=min(ls)
+    for i in user_weight:
+        if i.date==max_date:
+            last_wieght=user_weight[user_weight.index(i)].weight
+        if i.date==min_date:
+            first_wieght=user_weight[user_weight.index(i)].weight 
+    if last_wieght>first_wieght:
+        result=last_wieght-first_wieght
+        return {"weight gained":result}
+    elif last_wieght<first_wieght:
+        result=first_wieght-last_wieght
+        return {"weight lost":result}
+    else:
+        return {"your weight has not changed"}
 
 def calculate_bmi(db: Session, username: str):
     user = db.query(User).filter(User.username == username).first()
